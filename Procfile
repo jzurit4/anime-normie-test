@@ -1,0 +1,1 @@
+web: gunicorn normie_anime.wsgi --log-file -
