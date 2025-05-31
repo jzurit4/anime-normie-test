@@ -18,6 +18,7 @@ Este proyecto es un test web desarrollado en Django que mide qué tan "normie" e
    source venv/bin/activate  # En Windows: venv\Scripts\activate
    pip install -r requirements.txt
 3. Ejecutar servidor de desarrollo:
+   ```bash
    python manage.py runserver
 
 ## Uso
