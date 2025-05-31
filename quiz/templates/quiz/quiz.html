@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>¿Qué tan normie eres en anime?</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="social-links">
+            <a href="https://github.com/jzurit4" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="https://twitter.com/mon_panach3" target="_blank"><i class="fab fa-x-twitter"></i></a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="start-screen">
+            <h1>¿Qué tan normie eres en anime?</h1>
+            <p>Este test evaluará qué tan "normie" eres en el mundo del anime y manga, basado en tus conocimientos y gustos. ¿Te atreves?</p>
+            <button id="start-button">Comenzar</button>
+        </div>
+
+        <form id="quiz-form" method="post" style="display: none;">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="question-block" style="{% if forloop.first %}display:block{% else %}display:none{% endif %}">
+                    <p>{{ field.label }}</p>
+                    {{ field }}
+                    <button type="button" class="next-button">Siguiente</button>
+                </div>
+            {% endfor %}
+        </form>
+    </div>
+
+    <!-- Modal de resultado -->
+    <div id="result-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <h2 id="modal-title"></h2>
+            <img id="modal-image" src="" alt="Resultado" style="width: 100%; max-width: 300px; border-radius: 12px; margin: 15px 0;">
+            <p id="modal-message"></p>
+            <a id="modal-share" class="share-button" target="_blank">📤 Compartir en X (Twitter)</a>
+            <br><br>
+            <button onclick="location.reload()">🔄 Volver a intentarlo</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('start-button')?.addEventListener('click', () => {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-form').style.display = 'block';
+        });
+
+        const blocks = document.querySelectorAll('.question-block');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const form = document.getElementById('quiz-form');
+
+        document.querySelectorAll('.next-button').forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                const radios = blocks[index].querySelectorAll('input[type="radio"]');
+                let selected = false;
+                radios.forEach(r => { if (r.checked) selected = true; });
+
+                if (!selected) {
+                    alert("Por favor selecciona una respuesta antes de continuar.");
+                    return;
+                }
+
+                blocks[index].style.display = 'none';
+
+                if (blocks[index + 1]) {
+                    blocks[index + 1].style.display = 'block';
+                } else {
+                    const formData = new FormData(form);
+
+                    fetch('', {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrfToken },
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        // Mostrar título, mensaje y botón
+                        document.getElementById('modal-title').innerText = `Resultado: ${data.percentage}% normie`;
+                        document.getElementById('modal-message').innerText = data.message;
+                        document.getElementById('modal-share').href = data.share_url;
+
+                        // Elegir imagen según el porcentaje
+                        const img = document.getElementById('modal-image');
+                        const percent = data.percentage;
+
+                        if (percent >= 80) {
+                            img.src = "{% static 'images/normie_max.jpg' %}";
+                            img.alt = "Normie máximo";
+                        } else if (percent >= 50) {
+                            img.src = "{% static 'images/normie_medio.jpg' %}";
+                            img.alt = "Normie medio";
+                        } else {
+                            img.src = "{% static 'images/normie_zero.jpg' %}";
+                            img.alt = "Antinormie";
+                        }
+
+                        document.getElementById('result-modal').style.display = 'block';
+                    });
+                }
+            });
+        });
+
+        // Cerrar modal
+        document.getElementById('close-modal')?.addEventListener('click', () => {
+            document.getElementById('result-modal').style.display = 'none';
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('result-modal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
