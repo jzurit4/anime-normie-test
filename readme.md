@@ -32,6 +32,6 @@ Abre http://localhost:8000 en tu navegador, responde las preguntas y obtén tu r
 - HTML5 / CSS3
 - Font Awesome para íconos
 
-## Autor
+---
 
-José Zurita
+Desarrollado por [José Zurita](https://github.com/jzurit4/)
